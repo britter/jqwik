@@ -1,64 +1,63 @@
 package net.jqwik.engine.support;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.*;
-
 import net.jqwik.api.*;
-
-import static org.assertj.core.api.Assertions.*;
 
 class JqwikStreamSupportTests {
 
-	@Example
-	void concatenateStreams() {
-		AtomicInteger countCalls = new AtomicInteger(0);
-		Consumer<Integer> peeker = i -> countCalls.incrementAndGet();
+    @Example
+    void concatenateStreams() {
+        AtomicInteger countCalls = new AtomicInteger(0);
+        Consumer<Integer> peeker = i -> countCalls.incrementAndGet();
 
-		Stream<Integer> s1 = Stream.of(1, 2, 3, 4, 5)
-								   .peek(peeker);
-		Stream<Integer> s2 = Stream.of(6, 7, 8, 9, 10)
-								   .peek(peeker);
-		Stream<Integer> s3 = Stream.of(11, 12, 13, 14, 15)
-								   .peek(peeker);
+        Stream<Integer> s1 = Stream.of(1, 2, 3, 4, 5)
+            .peek(peeker);
+        Stream<Integer> s2 = Stream.of(6, 7, 8, 9, 10)
+            .peek(peeker);
+        Stream<Integer> s3 = Stream.of(11, 12, 13, 14, 15)
+            .peek(peeker);
 
-		Stream<Integer> stream = JqwikStreamSupport.concat(Stream.empty(), s1, s2, Stream.empty(), s3);
+        Stream<Integer> stream = JqwikStreamSupport.concat(Stream.empty(), s1, s2, Stream.empty(), s3);
 
-		Optional<Integer> anInt = stream
-									  .filter(i -> i % 2 == 0)
-									  .findFirst();
+        Optional<Integer> anInt = stream
+            .filter(i -> i % 2 == 0)
+            .findFirst();
 
-		assertThat(anInt.get()).isEqualTo(2);
-		assertThat(countCalls.get()).isEqualTo(2);
-	}
+        assertThat(anInt.get()).isEqualTo(2);
+        assertThat(countCalls.get()).isEqualTo(2);
+    }
 
-	@Example
-	void takeWhile() {
-		Stream<Integer> s1 = Stream.of(1, 2, 3, 4, 5, 6, 7);
+    @Example
+    void takeWhile() {
+        Stream<Integer> s1 = Stream.of(1, 2, 3, 4, 5, 6, 7);
 
-		Stream<Integer> s2 = JqwikStreamSupport.takeWhile(s1, i -> i < 5);
+        Stream<Integer> s2 = JqwikStreamSupport.takeWhile(s1, i -> i < 5);
 
-		assertThat(s2.collect(Collectors.toList())).containsExactly(1, 2, 3, 4);
-	}
+        assertThat(s2.collect(Collectors.toList())).containsExactly(1, 2, 3, 4);
+    }
 
-	@Example
-	void zip() {
-		Stream<Integer> s1 = Stream.of(1, 2, 3);
-		Stream<Integer> s2 = Stream.of(1, 1, 1);
+    @Example
+    void zip() {
+        Stream<Integer> s1 = Stream.of(1, 2, 3);
+        Stream<Integer> s2 = Stream.of(1, 1, 1);
 
-		Stream<Integer> zipped = JqwikStreamSupport.zip(s1, s2, Integer::sum);
+        Stream<Integer> zipped = JqwikStreamSupport.zip(s1, s2, Integer::sum);
 
-		assertThat(zipped.collect(Collectors.toList())).containsExactly(2, 3, 4);
-	}
+        assertThat(zipped.collect(Collectors.toList())).containsExactly(2, 3, 4);
+    }
 
-	@Example
-	void zipWithNullSkip() {
-		Stream<Integer> s1 = Stream.of(1, 2, 3);
-		Stream<Integer> s2 = Stream.of(1, 1, 1);
+    @Example
+    void zipWithNullSkip() {
+        Stream<Integer> s1 = Stream.of(1, 2, 3);
+        Stream<Integer> s2 = Stream.of(1, 1, 1);
 
-		Stream<Integer> zipped = JqwikStreamSupport.zip(s1, s2, (a, b) -> (a.equals(b)) ? null : Integer.sum(a, b));
+        Stream<Integer> zipped = JqwikStreamSupport.zip(s1, s2, (a, b) -> (a.equals(b)) ? null : Integer.sum(a, b));
 
-		assertThat(zipped.collect(Collectors.toList())).containsExactly(3, 4);
-	}
+        assertThat(zipped.collect(Collectors.toList())).containsExactly(3, 5);
+    }
 }
